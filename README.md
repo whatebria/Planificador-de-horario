@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
+<<html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Horario USM Simplificado</title>
@@ -26,16 +25,15 @@
 
     /* Variables CSS para el modo oscuro */
     :root {
-      /* --- CAMBIOS AQUÍ para mayor contraste --- */
-      --dark-mode-background: #121212; /* Más oscuro */
-      --dark-mode-text: #E0E0E0; /* Más claro */
-      --dark-mode-input-background: #282828; /* Más oscuro para inputs */
-      --dark-mode-input-border: #666; /* Más visible */
-      --dark-mode-table-header: #222; /* Más oscuro */
-      --dark-mode-table-border: #777; /* Más visible */
-      --dark-mode-card-background: #1E1E1E; /* Más oscuro para contenedores */
-      --dark-mode-shadow: rgba(0, 0, 0, 0.7); /* Sombra más intensa */
-      --usm-blue: #007BFF; /* Azul USM un poco más brillante para contraste */
+      --dark-mode-background: #1E1E1E; /* Gris oscuro para el fondo */
+      --dark-mode-text: #F8F8F2; /* Blanco hueso para el texto principal */
+      --dark-mode-input-background: #333; /* Gris más claro para inputs */
+      --dark-mode-input-border: #555;
+      --dark-mode-table-header: #333;
+      --dark-mode-table-border: #555;
+      --dark-mode-card-background: #2C2C2C; /* Gris un poco más claro para contenedores */
+      --dark-mode-shadow: rgba(0, 0, 0, 0.5); /* Sombra más intensa */
+      --usm-blue: #004AAD; /* Azul característico de la USM */
       --usm-white: #FFFFFF; /* Blanco USM */
     }
 
