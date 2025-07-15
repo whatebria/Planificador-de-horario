@@ -1228,15 +1228,11 @@ if (checkbox) {
 }
 
 
-// INICIALIZACIÓN FINAL (Asegura que estas funciones se ejecuten al cargar la página)
-document.addEventListener('DOMContentLoaded', () => {
+  
     console.log("DOMContentLoaded: El DOM ha sido completamente cargado.");
     loadFormOptions(); 
     construirTabla(); // Asegura que la tabla esté presente incluso sin datos cargados
     cargarHorario(); 
-    // renderizarMaterias() ya es llamada dentro de cargarHorario().
-});
-
 console.log("Fin del script principal.");
 </script>
 </body>
