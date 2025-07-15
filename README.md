@@ -1,9 +1,10 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Planificador de horario</title>
+  <title>Horario USM Simplificado</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  
   <style>
     /* VARIABLES CSS para una gestión de colores más fácil */
     :root {
@@ -15,7 +16,11 @@
       --dark-gray: #333;
       --border-color: #ccc;
       --table-border-color: #aaa;
-      --content-max-width: 4000px; /* Ancho máximo para el contenido principal */
+      
+      /* --- CAMBIO AQUÍ: Definir un ancho máximo para el contenido principal (formulario, tabla, etc.) --- */
+      --content-max-width: 85%; /* Ahora el formulario y la tabla ocuparán un máximo del 85% */
+      --form-input-width: 400px; /* Ancho deseado para los inputs/selects del formulario */
+      --main-padding: 20px; /* Padding general del body */
     }
 
     /* Variables CSS para el modo oscuro */
@@ -36,17 +41,20 @@
       font-family: 'Roboto', sans-serif; /* Fuente principal */
       background-color: #f5f7fa; /* Fondo suave */
       color: var(--dark-gray);
-      padding: 20px; /* Padding general del body para dejar espacio a los lados */
+      padding: var(--main-padding); /* Padding general del body */
       transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para el modo oscuro */
     }
 
-    h2 {
+    h2, h3 {
       font-family: 'Montserrat', sans-serif; /* Fuente para títulos */
       color: var(--primary-color);
       text-align: center;
       margin-bottom: 30px;
       font-weight: 600;
       transition: color 0.3s ease; /* Transición suave para el modo oscuro */
+    }
+    h3 {
+      margin-top: 30px;
     }
 
     /* Contenedores principales */
@@ -56,22 +64,30 @@
         border-radius: 8px; /* Bordes más redondeados */
         box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Sombra sutil */
         margin-bottom: 25px; /* Más espacio entre secciones */
-        max-width: var(--content-max-width); /* Limitar el ancho */
+        width: var(--content-max-width); /* Usar el 85% del ancho de la pantalla */
         margin-left: auto; /* Centrar horizontalmente */
         margin-right: auto; /* Centrar horizontalmente */
         transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Transición suave para el modo oscuro */
     }
+    
+    .formulario {
+        display: flex;
+        flex-direction: column; /* Apilar elementos */
+        align-items: center; /* Centrar elementos horizontalmente */
+        /* --- CAMBIO AQUÍ: El formulario toma el ancho máximo definido --- */
+        max-width: var(--content-max-width); 
+    }
 
     table {
       border-collapse: collapse;
-      width: 100%;
+      table-layout: fixed; /* Esto ayuda a que las celdas tengan anchos uniformes */
     }
     th, td {
       border: 1px solid var(--table-border-color);
       text-align: center;
-      padding: 8px;
+      padding: 8px; /* Padding por defecto de las celdas */
       vertical-align: middle;
-      height: 50px;
+      height: 50px; /* Altura mínima de la celda */
       position: relative;
       overflow: hidden;
       transition: border-color 0.3s ease; /* Transición suave para el modo oscuro */
@@ -82,6 +98,11 @@
       font-weight: 500;
       transition: background-color 0.3s ease, color 0.3s ease; /* Transición suave para el modo oscuro */
     }
+    /* Anchos específicos para las columnas de la tabla */
+    table th:first-child, table td:first-child { width: 5%; } /* Bloque */
+    table th:nth-child(2), table td:nth-child(2) { width: 10%; } /* Hora */
+    table th:nth-child(n+3), table td:nth-child(n+3) { width: 17%; } /* Días (100-5-10)/5 = 17% */
+
 
     /* FORMULARIO */
     .formulario label {
@@ -94,10 +115,14 @@
 
     .formulario .input-group {
         margin-bottom: 15px;
+        width: 100%; /* Ocupa el 100% del formulario (que ya tiene max-width) */
+        /* --- CAMBIO AQUÍ: Ahora el input-group toma el ancho completo del formulario, no un max-width fijo --- */
+        /* Eliminamos max-width: var(--form-input-width); para que se estire con el formulario */
+        text-align: left; /* Asegura que labels y inputs se alineen a la izquierda dentro de su grupo */
     }
 
     .formulario input, .formulario select {
-      width: calc(100% - 18px);
+      width: 100%; /* Ocupa el 100% de su input-group */
       padding: 10px;
       border: 1px solid var(--border-color);
       border-radius: 5px;
@@ -107,12 +132,26 @@
       transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; /* Transición suave para el modo oscuro */
     }
     .formulario input[type="color"] {
-        width: 60px;
+        width: 60px; /* Mantenemos el ancho pequeño para el color */
         padding: 5px;
     }
-
+    
+    /* Estilos para el select multiple nativo */
     .formulario select[multiple] {
-      height: 150px;
+        height: auto; /* Permite que el alto se ajuste al número de opciones */
+        min-height: 100px; /* Altura mínima para que se vean varias opciones */
+    }
+
+
+    .formulario .form-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        /* --- CAMBIO AQUÍ: Los botones también se estiran al 100% del formulario --- */
+        max-width: 100%; 
+        margin-top: 15px;
     }
 
     .formulario button {
@@ -122,23 +161,13 @@
       font-size: 1em;
       font-weight: 500;
       border: none;
-      margin-right: 10px;
       transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease, color 0.3s ease;
       display: inline-flex;
       align-items: center;
       gap: 8px;
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
-
-    .formulario button:last-child {
-      margin-right: 0;
-    }
-
-    .formulario button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    }
-
+    
     /* Colores específicos de botones */
     .formulario button:nth-of-type(1) {
         background-color: var(--primary-color);
@@ -166,65 +195,75 @@
 
 
     /* CELDA MATERIA Y TOPES */
+    /* Estilos base para ambas materias y topes */
     .celda-materia {
       position: absolute; top: 0; left: 0; width: 100%; height: 100%;
       font-weight: 500;
       display: flex;
       justify-content: center;
       align-items: center;
-      box-sizing: border-box;
-      padding: 5px;
-      word-break: break-word;
+      box-sizing: border-box; /* Asegura que padding no aumente el tamaño */
+      padding: 8px; /* Aumentar el padding para que el contenido tenga más espacio */
+      word-break: break-word; /* Rompe palabras largas */
+      overflow-wrap: break-word; /* Para mayor compatibilidad con rompimiento de palabras */
       flex-direction: column;
-      font-size: 0.9em;
-      line-height: 1.2;
-      transition: color 0.3s ease; /* Transición suave para el modo oscuro */
+      font-size: 0.85em; /* Tamaño de fuente para materias normales */
+      line-height: 1.2; /* Espaciado de línea */
+      transition: color 0.3s ease;
+      text-align: center; /* Centrar el texto en la celda */
     }
 
-    .tope {
+    /* Estilos específicos para celdas de "tope" */
+    .celda-materia.tope { /* Se aplica directamente a la div.celda-materia */
       background-color: var(--danger-color) !important;
       color: white;
-      font-weight: normal;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 3px;
-      font-size: 0.75em;
-      line-height: 1.1;
     }
 
     .tope .titulo-tope {
       display: block;
       font-weight: bold;
-      font-size: 1.1em;
+      font-size: 1.1em; /* Relativo al font-size de .celda-materia */
       margin-bottom: 2px;
       letter-spacing: 0.5px;
       text-transform: uppercase;
+      white-space: normal;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
     }
 
     .tope .materias-conflicto {
-        font-size: 0.9em;
+        font-size: 0.9em; /* Relativo al font-size de .celda-materia */
         text-align: center;
         line-height: 1.1;
+        white-space: normal;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
     }
 
     /* LISTA DE MATERIAS */
     #lista-materias {
         padding: 15px;
+        margin-top: 25px; /* Espacio extra porque ahora está debajo */
     }
 
-    #lista-materias div {
+    #lista-materias .materia-item { /* Nueva clase para cada materia en la lista */
       margin-bottom: 10px;
       padding: 10px;
       border: 1px solid var(--border-color);
-      border-radius: 5px;
+      border-radius: 5ppedx;
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      flex-direction: column; /* Cambiado a columna para el contenido y los horarios */
       background-color: var(--light-gray);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; /* Transición suave */
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    #lista-materias .materia-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px; /* Espacio entre el header y los horarios */
     }
 
     #lista-materias .materia-info {
@@ -232,9 +271,16 @@
         align-items: center;
         gap: 8px;
         font-weight: 400;
+        flex-grow: 1;
     }
 
-    #lista-materias .materia-info span { /* Asegura que el texto de la materia en lista también transicione */
+    #lista-materias .materia-info.oculta span {
+        text-decoration: line-through; /* Tachado para materias ocultas */
+        opacity: 0.7; /* Ligeramente transparente */
+    }
+
+
+    #lista-materias .materia-info span {
       transition: color 0.3s ease;
     }
 
@@ -245,6 +291,26 @@
         border: 1px solid rgba(0,0,0,0.1);
         flex-shrink: 0;
     }
+
+    #lista-materias .materia-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    #lista-materias .materia-horarios {
+        font-size: 0.9em;
+        padding-left: 26px; /* Para alinear con el inicio del texto de la materia */
+        color: var(--dark-gray);
+    }
+    #lista-materias .materia-horarios span {
+        display: block; /* Cada horario en su propia línea */
+        margin-bottom: 3px;
+    }
+    #lista-materias .materia-horarios strong {
+        color: var(--primary-color);
+    }
+
 
     #lista-materias button {
       padding: 6px 12px;
@@ -258,22 +324,31 @@
       gap: 5px;
     }
 
-    #lista-materias button:first-of-type {
+    #lista-materias button.btn-edit {
         background-color: var(--primary-color);
         color: white;
         border: none;
     }
-    #lista-materias button:first-of-type:hover {
+    #lista-materias button.btn-edit:hover {
         background-color: #1976D2;
     }
-    #lista-materias button:last-of-type {
+    #lista-materias button.btn-toggle {
+        background-color: #607D8B; /* Un gris azulado */
+        color: white;
+        border: none;
+    }
+    #lista-materias button.btn-toggle:hover {
+        background-color: #455A64;
+    }
+    #lista-materias button.btn-delete {
         background-color: var(--danger-color);
         color: white;
         border: none;
     }
-    #lista-materias button:last-of-type:hover {
+    #lista-materias button.btn-delete:hover {
         background-color: #D32F2F;
     }
+
 
     /* FEEDBACK MESSAGE */
     .feedback-message {
@@ -290,7 +365,8 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      max-width: var(--content-max-width);
+      /* --- CAMBIO AQUÍ: feedback también respeta el max-width --- */
+      max-width: var(--content-max-width); 
       margin-left: auto;
       margin-right: auto;
       margin-bottom: 25px;
@@ -303,18 +379,19 @@
       color: #d32f2f;
     }
 
-    /* >>>>>>> ESTILOS DEL SWITCH DE MODO OSCURO <<<<<<< */
+    /* ESTILOS DEL SWITCH DE MODO OSCURO */
     .theme-switch-wrapper {
       display: flex;
       align-items: center;
-      justify-content: flex-end; /* Mover a la derecha */
+      justify-content: flex-end;
       margin-bottom: 20px;
       font-size: 0.9em;
-      color: var(--dark-gray); /* Color por defecto en modo claro */
-      max-width: var(--content-max-width); /* Alinear con el contenido principal */
+      color: var(--dark-gray);
+      /* --- CAMBIO AQUÍ: El switch de tema también respeta el max-width --- */
+      max-width: var(--content-max-width); 
       margin-left: auto;
       margin-right: auto;
-      transition: color 0.3s ease; /* Transición suave para el modo oscuro */
+      transition: color 0.3s ease;
     }
 
     .theme-switch {
@@ -352,7 +429,7 @@
     }
 
     input:checked + .slider {
-      background-color: var(--primary-color); /* Usar color primario para el switch activado */
+      background-color: var(--primary-color);
     }
 
     input:focus + .slider {
@@ -372,14 +449,14 @@
       border-radius: 50%;
     }
 
-    /* >>>>>>> ESTILOS PARA EL MODO OSCURO (CUANDO body TIENE LA CLASE dark-mode) <<<<<<< */
+    /* ESTILOS PARA EL MODO OSCURO (CUANDO body TIENE LA CLASE dark-mode) */
     body.dark-mode {
       background-color: var(--dark-mode-background);
       color: var(--dark-mode-text);
     }
 
-    body.dark-mode h2 {
-      color: var(--usm-blue); /* Destacar título con azul USM */
+    body.dark-mode h2, body.dark-mode h3 {
+      color: var(--usm-blue);
     }
 
     body.dark-mode .formulario,
@@ -411,9 +488,15 @@
       color: var(--dark-mode-text);
     }
 
-    body.dark-mode #lista-materias div {
+    body.dark-mode #lista-materias .materia-item {
       background-color: var(--dark-mode-input-background);
       border-color: var(--dark-mode-input-border);
+    }
+    body.dark-mode #lista-materias .materia-horarios {
+        color: var(--dark-mode-text);
+    }
+    body.dark-mode #lista-materias .materia-horarios strong {
+        color: var(--usm-blue);
     }
 
     body.dark-mode #lista-materias .materia-info span {
@@ -421,24 +504,24 @@
     }
 
     body.dark-mode .feedback-message {
-      background-color: #2e7d32; /* Verde más oscuro para éxito */
+      background-color: #2e7d32;
       color: var(--dark-mode-text);
     }
     body.dark-mode .feedback-message.error {
-      background-color: #b71c1c; /* Rojo más oscuro para error */
+      background-color: #b71c1c;
       color: var(--dark-mode-text);
     }
 
     body.dark-mode .celda-materia {
-      color: var(--dark-mode-text); /* Asegurar color de texto en las celdas */
+      color: var(--dark-mode-text);
     }
-    body.dark-mode .celda-materia.tope { /* Específico para tope en dark mode */
-        color: var(--usm-white); /* Texto del tope en blanco USM */
+    body.dark-mode .celda-materia.tope {
+        color: var(--usm-white);
     }
 
     /* Botones en modo oscuro - ajuste de color de fondo y texto */
     body.dark-mode .formulario button {
-      background-color: #444; /* Fondo gris oscuro para botones generales */
+      background-color: #444;
       color: var(--dark-mode-text);
       box-shadow: 0 2px 5px var(--dark-mode-shadow);
     }
@@ -447,31 +530,38 @@
       box-shadow: 0 4px 8px var(--dark-mode-shadow);
     }
 
-    body.dark-mode .formulario button:nth-of-type(1) { /* Agregar / Actualizar - Destacar con azul USM */
+    body.dark-mode .formulario button:nth-of-type(1) {
         background-color: var(--usm-blue);
         color: var(--usm-white);
     }
     body.dark-mode .formulario button:nth-of-type(1):hover {
-        background-color: #003380; /* Azul más oscuro al pasar el ratón */
+        background-color: #003380;
     }
 
     body.dark-mode #lista-materias button {
-      background-color: #444; /* Fondo gris oscuro para botones de lista */
+      background-color: #444;
       color: var(--dark-mode-text);
     }
 
-    body.dark-mode #lista-materias button:first-of-type { /* Editar - Destacar con azul USM */
+    body.dark-mode #lista-materias button.btn-edit {
         background-color: var(--usm-blue);
         color: var(--usm-white);
     }
-    body.dark-mode #lista-materias button:first-of-type:hover {
+    body.dark-mode #lista-materias button.btn-edit:hover {
         background-color: #003380;
     }
-    body.dark-mode #lista-materias button:last-of-type { /* Eliminar - Mantener rojo */
+    body.dark-mode #lista-materias button.btn-toggle {
+        background-color: #555; /* Darker grey for toggle in dark mode */
+        color: var(--dark-mode-text);
+    }
+    body.dark-mode #lista-materias button.btn-toggle:hover {
+        background-color: #666;
+    }
+    body.dark-mode #lista-materias button.btn-delete {
         background-color: var(--danger-color);
         color: var(--dark-mode-text);
     }
-    body.dark-mode #lista-materias button:last-of-type:hover {
+    body.dark-mode #lista-materias button.btn-delete:hover {
         background-color: #B71C1C;
     }
 
@@ -479,44 +569,63 @@
       color: var(--dark-mode-text);
     }
 
-
     /* Ajustes responsivos básicos para pantallas más pequeñas */
     @media (max-width: 768px) {
         :root {
-            --content-max-width: 100%; /* En pantallas pequeñas, ocupa todo el ancho */
+            --content-max-width: 100%; /* En móviles, volvemos a 100% para aprovechar el espacio */
+            --main-padding: 15px;
         }
         body {
-            padding: 15px; /* Menos padding en los bordes */
+            padding: var(--main-padding);
         }
         .formulario input, .formulario select {
-            width: 100%; /* Asegura que ocupen todo el ancho disponible */
+            width: 100%;
         }
         .formulario button {
-            width: 100%; /* Botones apilados en móvil */
+            width: 100%;
             margin-right: 0;
             margin-bottom: 10px;
         }
-        #lista-materias div {
-            flex-direction: column; /* Apila info y botones en lista */
+        #lista-materias .materia-item { /* Usar la nueva clase aquí */
+            flex-direction: column;
             align-items: flex-start;
         }
-        #lista-materias div > div { /* Contenedor de botones en lista */
+        #lista-materias .materia-header { /* Nuevo */
+            width: 100%;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 5px;
+        }
+        #lista-materias .materia-actions {
             width: 100%;
             display: flex;
-            justify-content: flex-end; /* Alinea los botones a la derecha */
+            justify-content: flex-end;
             margin-top: 10px;
-            gap: 10px; /* Espacio entre botones */
+            gap: 10px;
         }
         .theme-switch-wrapper {
-          justify-content: center; /* Centrar el switch en móvil */
+          justify-content: center;
           margin-bottom: 25px;
         }
+
+        .formulario .input-group {
+            max-width: 100%; /* Aseguramos que los input-group se estiren en móviles */
+        }
+        /* Ajuste de celdas de tabla en móviles */
+        table th, table td {
+            font-size: 0.8em;
+            padding: 5px;
+            height: 40px;
+        }
+        table th:first-child, table td:first-child { width: 8%; } /* Bloque */
+        table th:nth-child(2), table td:nth-child(2) { width: 15%; } /* Hora */
+        table th:nth-child(n+3), table td:nth-child(n+3) { width: 15.4%; } /* Días */
     }
   </style>
 </head>
 <body>
 
-<h2>Generador de Horarios USM</h2>
+<h2>Generador de Horarios USM Simplificado</h2>
 
 <div class="theme-switch-wrapper">
   <label class="theme-switch" for="checkbox">
@@ -526,26 +635,10 @@
   <em>Modo Oscuro</em>
 </div>
 
-<div class="formulario">
+<div class="formulario" id="formulario-materia">
   <div class="input-group">
     <label for="materia">Nombre de la materia:</label>
     <input type="text" id="materia" placeholder="Ej: Cálculo I">
-  </div>
-
-  <div class="input-group">
-    <label for="dia">Día:</label>
-    <select id="dia">
-      <option value="Lunes">Lunes</option>
-      <option value="Martes">Martes</option>
-      <option value="Miércoles">Miércoles</option>
-      <option value="Jueves">Jueves</option>
-      <option value="Viernes">Viernes</option>
-    </select>
-  </div>
-
-  <div class="input-group">
-    <label for="bloques">Bloques (Mantén Ctrl/Cmd para seleccionar múltiples):</label>
-    <select multiple id="bloques" size="10" style="width: 100%;"></select>
   </div>
 
   <div class="input-group">
@@ -554,14 +647,26 @@
   </div>
 
   <div class="input-group">
+    <label for="dia-seleccion">Día del horario:</label>
+    <select id="dia-seleccion"></select> </div>
+
+  <div class="input-group" id="bloques-fijos-container">
+    <label for="bloques-seleccion">Bloques del horario:</label>
+    <select multiple id="bloques-seleccion"></select> </div>
+
+  <div class="input-group">
     <label for="color">Color de la materia:</label>
     <input type="color" id="color" value="#90ee90">
   </div>
+
   <br>
-  <button onclick="agregarMateria()"><i class="fas fa-plus-circle"></i> Agregar / Actualizar</button>
-  <button onclick="guardarHorario()"><i class="fas fa-save"></i> Guardar</button>
-  <button onclick="cargarHorario()"><i class="fas fa-folder-open"></i> Cargar</button>
-  <button onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
+  <div class="form-buttons">
+    <button onclick="agregarActualizarMateriaYHorario()"><i class="fas fa-plus-circle"></i> Agregar/Actualizar Materia y Horario</button>
+    <button onclick="guardarHorario()"><i class="fas fa-save"></i> Guardar</button>
+    <button onclick="cargarHorario()"><i class="fas fa-folder-open"></i> Cargar</button>
+    <button onclick="exportarPDF()"><i class="fas fa-file-pdf"></i> Exportar a PDF</button>
+    <button onclick="clearLocalStorageData()" style="background-color: orange; color: white;"><i class="fas fa-eraser"></i> Limpiar Datos Guardados</button>
+  </div>
 </div>
 
 <div id="feedback-message" class="feedback-message" aria-live="polite"></div>
@@ -580,7 +685,10 @@
 <div id="lista-materias"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <script>
+console.log("Script iniciado."); // Para Koder, puede que no se vea
+
 const bloquesUSM = [
   ["1", "08:15 – 08:50"], ["2", "08:50 – 09:25"], ["3", "09:35 – 10:10"],
   ["4", "10:10 – 10:45"], ["5", "10:55 – 11:30"], ["6", "11:30 – 12:05"],
@@ -591,49 +699,81 @@ const bloquesUSM = [
 ];
 
 const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
-const materias = [];
-const tabla = document.getElementById("tabla");
-const selectBloques = document.getElementById("bloques");
+const materias = []; // Array principal que almacena las materias
 
+// Obtención de referencias a elementos del DOM
+// ¡IMPORTANTE! Revisa estos IDs si algo no carga.
+const tabla = document.getElementById("tabla");
 const inputMateria = document.getElementById("materia");
 const inputParalelo = document.getElementById("paralelo");
 const inputColor = document.getElementById("color");
-const selectDia = document.getElementById("dia");
+const selectDiaSeleccion = document.getElementById("dia-seleccion"); // Ahora es `dia-seleccion` (singular)
+const selectBloquesSeleccion = document.getElementById("bloques-seleccion"); // Nuevo ID para el select de bloques fijo
 const listaMateriasDiv = document.getElementById("lista-materias");
 const feedbackMessageDiv = document.getElementById("feedback-message");
+const formularioMateria = document.getElementById("formulario-materia");
+const checkbox = document.getElementById("checkbox"); // Para el modo oscuro
+
+console.log("Referencias a elementos del DOM obtenidas."); // Para Koder, puede que no se vea
+
 
 // Función para determinar el color del texto (negro o blanco) según el fondo
 function getContrastTextColor(hexColor) {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
-    // Fórmula de luminosidad para determinar el contraste
-    const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+    // Fórmula de luminosidad para determinar el contraste (WCAG 2.0)
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     
-    // Si el modo oscuro está activo, el contraste debe ser con el blanco USM o blanco general.
-    // Si el color de fondo es claro, el texto debería ser oscuro (var(--dark-gray))
-    // Si el color de fondo es oscuro, el texto debería ser claro (white o var(--usm-white))
+    // Umbral de luminancia. Un valor más alto para texto claro sobre fondo oscuro,
+    // y más bajo para texto oscuro sobre fondo claro.
+    const threshold = 0.5; // Ajustable
+
+    // Si el body está en modo oscuro, el fondo ya es oscuro, queremos texto claro si el color de la materia no es muy brillante.
+    // Si el body no está en modo oscuro, el fondo es claro, queremos texto oscuro si el color de la materia no es muy oscuro.
     if (document.body.classList.contains('dark-mode')) {
-        // En modo oscuro, queremos que el texto sea claro (blanco USM) si el color de la materia es oscuro,
-        // o un gris oscuro si la materia es muy clara para evitar el contraste con el fondo oscuro general.
-        return (brightness > 180) ? 'black' : 'white'; // En modo oscuro, siempre texto blanco para las materias
+        return luminance > threshold ? '#333' : 'white'; // Fondo oscuro, si el color de la materia es claro, usa texto oscuro. Si es oscuro, usa texto blanco.
     } else {
-        // En modo claro, queremos texto oscuro si la materia es clara, y blanco si la materia es oscura.
-        return (brightness > 180) ? '#333' : 'white';
+        return luminance > threshold ? '#333' : 'white'; // Fondo claro, si el color de la materia es claro, usa texto oscuro. Si es oscuro, usa texto blanco.
     }
 }
 
 
-// Carga las opciones de bloques al iniciar
-bloquesUSM.forEach(([numero, hora]) => {
-  const option = document.createElement("option");
-  option.value = numero;
-  option.textContent = `Bloque ${numero} (${hora})`;
-  selectBloques.appendChild(option);
-});
+// Carga las opciones de días y bloques al iniciar
+function loadFormOptions() {
+  console.log("loadFormOptions: Inicializando select de día y bloques.");
+  if (!selectDiaSeleccion || !selectBloquesSeleccion) {
+      console.error("loadFormOptions: Elementos de selección no encontrados.");
+      return;
+  }
+
+  // Cargar opciones para el select de un solo día
+  selectDiaSeleccion.innerHTML = "";
+  dias.forEach(dia => {
+    const option = document.createElement("option");
+    option.value = dia;
+    option.textContent = dia;
+    selectDiaSeleccion.appendChild(option);
+  });
+
+  // Cargar opciones para el select múltiple de bloques (siempre presente)
+  selectBloquesSeleccion.innerHTML = "";
+  bloquesUSM.forEach(([numero, hora]) => {
+      const option = document.createElement("option");
+      option.value = numero;
+      option.textContent = `Bloque ${numero} (${hora})`;
+      selectBloquesSeleccion.appendChild(option);
+  });
+  console.log("loadFormOptions: Selects de día y bloques inicializados.");
+}
 
 
 function construirTabla() {
+  console.log("construirTabla: Iniciando construcción de la tabla.");
+  if (!tabla) {
+      console.error("construirTabla: Elemento 'tabla' no encontrado.");
+      return;
+  }
   tabla.innerHTML = "";
   for (let [numero, hora] of bloquesUSM) {
     const fila = document.createElement("tr");
@@ -645,19 +785,32 @@ function construirTabla() {
     }
     tabla.appendChild(fila);
   }
+  console.log("construirTabla: Tabla construida.");
 }
 
 function renderizarMaterias() {
-  construirTabla();
+  console.log("renderizarMaterias: Iniciando renderizado de materias en la tabla y lista.");
+  construirTabla(); // Asegura que la tabla esté fresca
 
-  const ocupacion = {};
+  const ocupacion = {}; 
+  
   for (const mat of materias) {
-    for (const bloque of mat.bloques) {
-      const clave = `${bloque}-${mat.dia}`;
-      if (!ocupacion[clave]) {
-        ocupacion[clave] = [];
+    if (!mat.oculto) {
+      // Ahora cada materia tiene un solo 'horario' o un array con un solo horario.
+      // Normalizamos a un array para la iteración.
+      const horariosArray = Array.isArray(mat.horarios) ? mat.horarios : (mat.horarios ? [mat.horarios] : []);
+      
+      for (const horario of horariosArray) {
+        if (horario && horario.dia && Array.isArray(horario.bloques)) {
+            for (const bloque of horario.bloques) {
+              const clave = `${bloque}-${horario.dia}`;
+              if (!ocupacion[clave]) {
+                ocupacion[clave] = [];
+              }
+              ocupacion[clave].push(mat); 
+            }
+        }
       }
-      ocupacion[clave].push(mat);
     }
   }
 
@@ -669,28 +822,26 @@ function renderizarMaterias() {
       const celda = document.getElementById(`B${numeroBloque}-${dia}`);
 
       if (!celda) {
-        console.warn(`Celda con ID ${clave} no encontrada.`);
+        console.warn(`renderizarMaterias: Celda con ID ${clave} no encontrada. Esto puede indicar un problema en construirTabla.`);
         continue;
       }
 
       celda.innerHTML = "";
       celda.style.display = "";
       celda.rowSpan = 1;
-      celda.classList.remove("tope");
       celda.style.backgroundColor = "";
       celda.style.color = "";
 
       const materiasEnEsteBloque = ocupacion[clave] || [];
 
       if (materiasEnEsteBloque.length > 1) {
-        const contenidoTopes = materiasEnEsteBloque.map(m => `${m.nombre} (P${m.paralelo})`).join("<br>");
+        const contenidoTopes = [...new Set(materiasEnEsteBloque.map(m => `${m.nombre} (P${m.paralelo})`))].join("<br>");
         celda.innerHTML = `
           <div class="celda-materia tope">
             <span class="titulo-tope">TOPE DE HORARIO</span>
             <span class="materias-conflicto">${contenidoTopes}</span>
           </div>
         `;
-        celda.classList.add("tope");
       } else if (materiasEnEsteBloque.length === 1) {
         const mat = materiasEnEsteBloque[0];
         const textColor = getContrastTextColor(mat.color);
@@ -702,11 +853,16 @@ function renderizarMaterias() {
       }
     }
   }
-
   listarMaterias();
+  console.log("renderizarMaterias: Renderizado completado.");
 }
 
 function mostrarFeedback(message, type = 'success') {
+    console.log(`Feedback: ${message} (Type: ${type})`); // Para Koder, puede que no se vea
+    if (!feedbackMessageDiv) {
+        console.error("mostrarFeedback: Elemento feedbackMessageDiv no encontrado.");
+        return;
+    }
     feedbackMessageDiv.textContent = "";
     feedbackMessageDiv.classList.remove('success', 'error');
 
@@ -731,81 +887,163 @@ function mostrarFeedback(message, type = 'success') {
     }, 3000);
 }
 
-function agregarMateria() {
+function agregarActualizarMateriaYHorario() {
+  console.log("agregarActualizarMateriaYHorario: Iniciado.");
   const nombre = inputMateria.value.trim();
   const paralelo = inputParalelo.value.trim();
   const color = inputColor.value;
-  const dia = selectDia.value;
-  const bloques = Array.from(selectBloques.selectedOptions).map(opt => opt.value);
+  
+  const diaSeleccionado = selectDiaSeleccion.value;
+  const bloquesSeleccionados = Array.from(selectBloquesSeleccion.selectedOptions).map(option => option.value);
 
-  if (!nombre || !paralelo || bloques.length === 0) {
-    mostrarFeedback("Completa todos los campos: nombre, paralelo y selecciona al menos un bloque.", 'error');
+  if (!nombre || !paralelo) { 
+    mostrarFeedback("Completa los campos de nombre y paralelo.", 'error');
+    console.log("agregarActualizarMateriaYHorario: Error - Campos nombre/paralelo vacíos.");
     return;
+  }
+  if (!diaSeleccionado || bloquesSeleccionados.length === 0) {
+      mostrarFeedback("Selecciona un día y al menos un bloque para el horario.", 'error');
+      console.log("agregarActualizarMateriaYHorario: Error - Día o bloques no seleccionados.");
+      return;
   }
 
   if (isNaN(paralelo)) {
       mostrarFeedback("El paralelo debe ser un valor numérico.", 'error');
+      console.log("agregarActualizarMateriaYHorario: Error - Paralelo no numérico.");
       return;
   }
 
-  const existenteIndex = materias.findIndex(m => m.nombre === nombre && m.paralelo === paralelo && m.dia === dia);
-  if (existenteIndex !== -1) {
-    materias[existenteIndex] = { nombre, paralelo, color, dia, bloques };
-    mostrarFeedback("Materia actualizada exitosamente.");
+  // Objeto de horario para la materia
+  const nuevoHorario = { dia: diaSeleccionado, bloques: bloquesSeleccionados };
+
+  let materiaExistenteIndex = materias.findIndex(m => m.nombre === nombre && m.paralelo === paralelo);
+
+  if (materiaExistenteIndex !== -1) {
+    // Materia ya existe, actualiza sus datos y horario
+    let materiaExistente = materias[materiaExistenteIndex];
+    materiaExistente.color = color;
+    // Asigna el nuevo horario (o actualiza el existente)
+    materiaExistente.horarios = [nuevoHorario]; // Simplificamos a un array con un solo horario
+    mostrarFeedback(`Materia "${nombre}" y horario actualizados.`);
   } else {
-    materias.push({ nombre, paralelo, color, dia, bloques });
-    mostrarFeedback("Materia agregada exitosamente.");
+    // Materia no existe, crea una nueva
+    materias.push({ 
+      nombre, 
+      paralelo, 
+      color, 
+      horarios: [nuevoHorario], // Almacenamos el horario como un array con un solo elemento
+      oculto: false 
+    });
+    mostrarFeedback("Materia y horario agregados exitosamente.");
   }
 
+  // Limpiar el formulario
   inputMateria.value = "";
   inputParalelo.value = "";
-  selectBloques.selectedIndex = -1;
   inputColor.value = "#90ee90";
+  selectDiaSeleccion.value = ""; // Deseleccionar el día
+  Array.from(selectBloquesSeleccion.options).forEach(option => option.selected = false); // Deseleccionar todos los bloques
 
   renderizarMaterias();
+  console.log("agregarActualizarMateriaYHorario: Finalizado.");
 }
 
 function listarMaterias() {
+  console.log("listarMaterias: Iniciado.");
+  if (!listaMateriasDiv) {
+      console.error("listarMaterias: Elemento listaMateriasDiv no encontrado.");
+      return;
+  }
   listaMateriasDiv.innerHTML = "";
   materias.forEach((mat, i) => {
     const div = document.createElement("div");
+    div.classList.add('materia-item');
+
+    // Asumimos que ahora solo hay un horario por materia, o es el primer elemento del array
+    const horarioDisplay = mat.horarios && mat.horarios.length > 0 ? mat.horarios[0] : { dia: 'N/A', bloques: [] };
+    const horariosHtml = `<span><strong>${horarioDisplay.dia}:</strong> Bloques ${horarioDisplay.bloques.join(", ")}</span>`;
+
     div.innerHTML = `
-      <div class="materia-info">
-        <span class="color-indicator" style="background-color: ${mat.color};"></span>
-        <span>
-          <strong>${mat.nombre}</strong> (P${mat.paralelo}) - ${mat.dia}, Bloques: ${mat.bloques.join(", ")}
-        </span>
+      <div class="materia-header">
+        <div class="materia-info ${mat.oculto ? 'oculta' : ''}">
+          <span class="color-indicator" style="background-color: ${mat.color};"></span>
+          <span>
+            <strong>${mat.nombre}</strong> (P${mat.paralelo})
+          </span>
+        </div>
+        <div class="materia-actions">
+          <button class="btn-toggle" onclick="toggleOcultarMateria(${i})">
+              <i class="fas ${mat.oculto ? 'fa-eye' : 'fa-eye-slash'}"></i> ${mat.oculto ? 'Mostrar' : 'Ocultar'}
+          </button>
+          <button class="btn-edit" onclick="editarMateria(${i})"><i class="fas fa-edit"></i> Editar</button>
+          <button class="btn-delete" onclick="eliminarMateria(${i})"><i class="fas fa-trash-alt"></i> Eliminar</button>
+        </div>
       </div>
-      <div>
-        <button onclick="editarMateria(${i})"><i class="fas fa-edit"></i> Editar</button>
-        <button onclick="eliminarMateria(${i})"><i class="fas fa-trash-alt"></i> Eliminar</button>
+      <div class="materia-horarios">
+        ${horariosHtml}
       </div>
     `;
     listaMateriasDiv.appendChild(div);
   });
+  console.log("listarMaterias: Finalizado.");
 }
 
 function editarMateria(index) {
+  console.log(`editarMateria: Editando materia en índice ${index}.`);
   const mat = materias[index];
   inputMateria.value = mat.nombre;
   inputParalelo.value = mat.paralelo;
   inputColor.value = mat.color;
-  selectDia.value = mat.dia;
-
-  Array.from(selectBloques.options).forEach(opt => opt.selected = false);
-
-  for (const opt of selectBloques.options) {
-    opt.selected = mat.bloques.includes(opt.value);
+  
+  if (!selectDiaSeleccion || !selectBloquesSeleccion) {
+      console.error("editarMateria: Elementos de selección no encontrados.");
+      return;
   }
+
+  // Limpiar selección de día y bloques
+  selectDiaSeleccion.value = "";
+  Array.from(selectBloquesSeleccion.options).forEach(option => option.selected = false);
+  console.log("editarMateria: Selects deseleccionados en el formulario.");
+
+  if (mat.horarios && mat.horarios.length > 0) {
+    const horarioEditar = mat.horarios[0]; // Tomamos el primer (y único) horario
+    if (horarioEditar.dia) {
+        selectDiaSeleccion.value = horarioEditar.dia;
+    }
+    if (Array.isArray(horarioEditar.bloques)) {
+        horarioEditar.bloques.forEach(bloque => {
+            const optionToSelect = selectBloquesSeleccion.querySelector(`option[value="${bloque}"]`);
+            if (optionToSelect) {
+                optionToSelect.selected = true;
+                console.log(`editarMateria: Bloque ${bloque} seleccionado.`);
+            }
+        });
+    }
+  }
+  console.log("editarMateria: Día y bloques de la materia preseleccionados.");
+
+  if (formularioMateria) {
+      formularioMateria.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } else {
+      console.warn("editarMateria: Elemento formularioMateria no encontrado para scroll.");
+  }
+  console.log("editarMateria: Finalizado.");
 }
 
 function eliminarMateria(index) {
-  if (confirm("¿Estás seguro de que quieres eliminar esta materia?")) {
+  if (confirm("¿Estás seguro de que quieres eliminar esta materia (incluyendo su horario)?")) {
     materias.splice(index, 1);
     renderizarMaterias();
     mostrarFeedback("Materia eliminada correctamente.");
   }
 }
+
+function toggleOcultarMateria(index) {
+    materias[index].oculto = !materias[index].oculto;
+    renderizarMaterias();
+    mostrarFeedback(`Materia "${materias[index].nombre}" ${materias[index].oculto ? 'ocultada' : 'mostrada'} correctamente.`);
+}
+
 
 function guardarHorario() {
   localStorage.setItem("horarioUSM", JSON.stringify(materias));
@@ -813,11 +1051,67 @@ function guardarHorario() {
 }
 
 function cargarHorario() {
-  const datos = JSON.parse(localStorage.getItem("horarioUSM") || "[]");
-  materias.length = 0;
-  materias.push(...datos);
+  console.log("cargarHorario: Iniciando carga desde localStorage.");
+  let datos = [];
+  try {
+    const storedData = localStorage.getItem("horarioUSM");
+    if (storedData) {
+        datos = JSON.parse(storedData);
+        console.log("cargarHorario: Datos cargados exitosamente de localStorage.");
+    } else {
+        console.log("cargarHorario: No se encontraron datos en localStorage.");
+    }
+  } catch (e) {
+    console.error("cargarHorario: Error al cargar horario desde localStorage:", e);
+    mostrarFeedback("Error al cargar horario guardado. Se ha borrado el horario corrupto.", 'error');
+    localStorage.removeItem("horarioUSM"); 
+    datos = []; 
+  }
+  
+  materias.length = 0; 
+  datos.forEach(m => {
+      // --- Saneamiento de datos para el formato simplificado ---
+      let saneadoHorario = null;
+      if (m.horarios && Array.isArray(m.horarios) && m.horarios.length > 0) {
+          // Si ya es un array de horarios, tomamos el primero
+          let h = m.horarios[0];
+          if (h && typeof h === 'object' && h.dia && Array.isArray(h.bloques)) {
+              saneadoHorario = { dia: h.dia, bloques: h.bloques.map(String) };
+          } else if (h && typeof h === 'object' && h.dia && h.bloques) {
+              // Si bloques no es array (ej. de una versión antigua que era string/número)
+              saneadoHorario = { dia: h.dia, bloques: [String(h.bloques)].filter(Boolean) };
+          }
+      } else if (m.dia && m.bloques) {
+          // Compatibilidad con formato antiguo donde 'dia' y 'bloques' estaban directamente en la materia
+          saneadoHorario = {
+              dia: m.dia,
+              bloques: Array.isArray(m.bloques) ? m.bloques.map(String) : [String(m.bloques)].filter(Boolean)
+          };
+      }
+      
+      // La materia ahora siempre tendrá un array 'horarios' con un máximo de un elemento
+      const finalHorarios = saneadoHorario ? [saneadoHorario] : [];
+
+      if (typeof m.oculto === 'undefined') {
+          m.oculto = false;
+      }
+      
+      materias.push({
+          nombre: m.nombre,
+          paralelo: m.paralelo,
+          color: m.color,
+          horarios: finalHorarios,
+          oculto: m.oculto
+      });
+  });
   renderizarMaterias();
-  mostrarFeedback("Horario cargado desde el navegador.");
+  // Solo mostrar feedback si la carga fue realmente exitosa o manejada
+  if (datos.length > 0) {
+      mostrarFeedback("Horario cargado desde el navegador.");
+  } else {
+      mostrarFeedback("No se encontró horario guardado o los datos estaban corruptos (limpiados).", 'info');
+  }
+  console.log("cargarHorario: Finalizada la carga. Materias:", materias);
 }
 
 function exportarPDF() {
@@ -834,20 +1128,24 @@ function exportarPDF() {
   exportContainer.style.width = '100%';
   exportContainer.style.padding = '20px';
 
+  // Clonar la tabla y el título para la exportación
   const h2ForPdf = document.querySelector('h2').cloneNode(true);
   const tableForPdf = document.querySelector('table').cloneNode(true);
 
+  // Asegurar que las celdas de la tabla clonada mantengan el estilo original de las materias
   const pdfCells = tableForPdf.querySelectorAll('td');
-
   pdfCells.forEach(cell => {
       const celdaMateriaDiv = cell.querySelector('.celda-materia');
       if (celdaMateriaDiv) {
+          // Copiar el contenido interno y los estilos de fondo/color de texto
           cell.innerHTML = celdaMateriaDiv.innerHTML;
           cell.style.backgroundColor = celdaMateriaDiv.style.backgroundColor;
           cell.style.color = celdaMateriaDiv.style.color;
-          cell.style.position = 'static'; // Important for PDF
-          cell.style.display = '';
+          cell.style.position = 'static'; // Esencial para PDF, remueve el posicionamiento absoluto
+          cell.style.display = ''; // Asegurar que sea visible
       }
+      // Si la celda fue ocultada (por ejemplo, por rowspan en una versión anterior),
+      // asegurarse de que no haya contenido si no hay materia.
       if (cell.style.display === 'none') {
           cell.style.display = '';
           cell.innerHTML = '';
@@ -858,31 +1156,63 @@ function exportarPDF() {
   exportContainer.appendChild(h2ForPdf);
   exportContainer.appendChild(tableForPdf);
 
-  html2pdf().set(opt).from(exportContainer).save();
+  if (typeof html2pdf !== 'undefined') {
+    html2pdf().set(opt).from(exportContainer).save()
+        .then(() => console.log("PDF generado y guardado exitosamente."))
+        .catch(err => {
+            console.error("Error al generar PDF:", err);
+            mostrarFeedback("Error al generar PDF. Revisa la consola.", 'error');
+        });
+  } else {
+      console.error("html2pdf no está definido. Asegúrate de que la librería se haya cargado correctamente.");
+      mostrarFeedback("Error: La función de exportar a PDF no está disponible.", 'error');
+  }
 }
 
-// >>>>> Lógica del Modo Oscuro <<<<<
-const checkbox = document.getElementById("checkbox");
+// Lógica para limpiar datos de localStorage
+function clearLocalStorageData() {
+    if (confirm("¿Estás seguro de que quieres borrar TODOS los datos del horario guardados? Esta acción no se puede deshacer.")) {
+        localStorage.removeItem("horarioUSM");
+        localStorage.removeItem("darkMode"); 
+        materias.length = 0; 
+        renderizarMaterias(); 
+        mostrarFeedback("Datos guardados limpiados. Recarga la página si persisten los problemas.", 'success');
+        console.log("localStorage limpiado.");
+    }
+}
+
+// Lógica del Modo Oscuro
 const body = document.body;
 
 // Comprobar si hay una preferencia guardada al cargar la página
 const isDarkMode = localStorage.getItem('darkMode') === 'true';
 if (isDarkMode) {
   body.classList.add('dark-mode');
-  checkbox.checked = true;
+  if (checkbox) checkbox.checked = true;
 }
 
 // Escuchar el cambio en el checkbox para alternar el modo oscuro
-checkbox.addEventListener('change', () => {
-  body.classList.toggle('dark-mode');
-  localStorage.setItem('darkMode', checkbox.checked); // Guardar la preferencia
-  renderizarMaterias(); // Volver a renderizar materias para recalcular colores de texto si es necesario
+if (checkbox) {
+    checkbox.addEventListener('change', () => {
+      body.classList.toggle('dark-mode');
+      localStorage.setItem('darkMode', checkbox.checked); 
+      renderizarMaterias(); 
+    });
+} else {
+    console.warn("Elemento checkbox para modo oscuro no encontrado.");
+}
+
+
+// INICIALIZACIÓN FINAL (Asegura que estas funciones se ejecuten al cargar la página)
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("DOMContentLoaded: El DOM ha sido completamente cargado.");
+    loadFormOptions(); 
+    construirTabla(); // Asegura que la tabla esté presente incluso sin datos cargados
+    cargarHorario(); 
+    // renderizarMaterias() ya es llamada dentro de cargarHorario().
 });
 
-
-// Inicialización:
-construirTabla();
-cargarHorario();
+console.log("Fin del script principal.");
 </script>
 </body>
 </html>
