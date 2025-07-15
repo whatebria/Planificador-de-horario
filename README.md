@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
@@ -211,7 +210,7 @@
       flex-direction: column;
       font-size: 0.85em; /* Tamaño de fuente para materias normales */
       line-height: 1.2; /* Espaciado de línea */
-      transition: color 0.3s ease;
+      transition: color 0.3s ease, background-color 0.3s ease; /* Asegurar transición de fondo */
       text-align: center; /* Centrar el texto en la celda */
     }
 
@@ -463,21 +462,31 @@
 
     body.dark-mode .formulario,
     body.dark-mode #lista-materias,
-    body.dark-mode table,
     body.dark-mode .feedback-message {
       background-color: var(--dark-mode-card-background);
       color: var(--dark-mode-text);
       box-shadow: 0 4px 10px var(--dark-mode-shadow);
     }
 
+    /* --- INICIO DEL CAMBIO CLAVE PARA LA TABLA EN MODO OSCURO --- */
+    body.dark-mode table {
+      background-color: var(--dark-mode-card-background); /* Fondo general de la tabla en modo oscuro */
+      box-shadow: 0 4px 10px var(--dark-mode-shadow);
+    }
+    
     body.dark-mode th {
-      background-color: var(--dark-mode-table-header);
-      color: var(--dark-mode-text);
+      background-color: var(--dark-mode-table-header); /* Fondo de los encabezados de la tabla */
+      color: var(--dark-mode-text); /* Color del texto de los encabezados */
+      border-color: var(--dark-mode-table-border); /* Color del borde de los encabezados */
     }
 
     body.dark-mode td {
-      border-color: var(--dark-mode-table-border);
+      background-color: var(--dark-mode-card-background); /* Fondo por defecto de las celdas en modo oscuro */
+      color: var(--dark-mode-text); /* Color del texto por defecto de las celdas (para celdas vacías) */
+      border-color: var(--dark-mode-table-border); /* Color del borde de las celdas */
     }
+    /* --- FIN DEL CAMBIO CLAVE PARA LA TABLA EN MODO OSCURO --- */
+
 
     body.dark-mode .formulario input,
     body.dark-mode .formulario select {
@@ -514,11 +523,16 @@
       color: var(--dark-mode-text);
     }
 
+    /* Ajuste para el texto dentro de .celda-materia en modo oscuro,
+       aunque su color de fondo se establece in-line por JS */
     body.dark-mode .celda-materia {
-      color: var(--dark-mode-text);
+        /* El color de texto se maneja principalmente por getContrastTextColor en JS,
+           pero esta regla asegura que cualquier otro texto dentro tenga un color visible */
+        color: var(--dark-mode-text); /* Fallback o para texto no afectado por getContrastTextColor */
     }
+
     body.dark-mode .celda-materia.tope {
-        color: var(--usm-white);
+        color: var(--usm-white); /* Para el texto del tope, siempre blanco sobre el rojo */
     }
 
     /* Botones en modo oscuro - ajuste de color de fondo y texto */
@@ -689,7 +703,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
-console.log("Script iniciado."); // Para Koder, puede que no se vea
+console.log("Script iniciado.");
 
 const bloquesUSM = [
   ["1", "08:15 – 08:50"], ["2", "08:50 – 09:25"], ["3", "09:35 – 10:10"],
@@ -704,19 +718,18 @@ const dias = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
 const materias = []; // Array principal que almacena las materias
 
 // Obtención de referencias a elementos del DOM
-// ¡IMPORTANTE! Revisa estos IDs si algo no carga.
 const tabla = document.getElementById("tabla");
 const inputMateria = document.getElementById("materia");
 const inputParalelo = document.getElementById("paralelo");
 const inputColor = document.getElementById("color");
-const selectDiaSeleccion = document.getElementById("dia-seleccion"); // Ahora es `dia-seleccion` (singular)
-const selectBloquesSeleccion = document.getElementById("bloques-seleccion"); // Nuevo ID para el select de bloques fijo
+const selectDiaSeleccion = document.getElementById("dia-seleccion");
+const selectBloquesSeleccion = document.getElementById("bloques-seleccion");
 const listaMateriasDiv = document.getElementById("lista-materias");
 const feedbackMessageDiv = document.getElementById("feedback-message");
 const formularioMateria = document.getElementById("formulario-materia");
 const checkbox = document.getElementById("checkbox"); // Para el modo oscuro
 
-console.log("Referencias a elementos del DOM obtenidas."); // Para Koder, puede que no se vea
+console.log("Referencias a elementos del DOM obtenidas.");
 
 
 // Función para determinar el color del texto (negro o blanco) según el fondo
@@ -724,20 +737,20 @@ function getContrastTextColor(hexColor) {
     const r = parseInt(hexColor.slice(1, 3), 16);
     const g = parseInt(hexColor.slice(3, 5), 16);
     const b = parseInt(hexColor.slice(5, 7), 16);
-    // Fórmula de luminosidad para determinar el contraste (WCAG 2.0)
     const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
     
-    // Umbral de luminancia. Un valor más alto para texto claro sobre fondo oscuro,
-    // y más bajo para texto oscuro sobre fondo claro.
-    const threshold = 0.5; // Ajustable
+    // Este umbral es crucial para la decisión.
+    // Un valor más alto hace que el color claro se use más.
+    // Un valor más bajo hace que el color oscuro se use más.
+    // Mantener 0.5 es un buen punto de partida.
+    const threshold = 0.5;
 
-    // Si el body está en modo oscuro, el fondo ya es oscuro, queremos texto claro si el color de la materia no es muy brillante.
-    // Si el body no está en modo oscuro, el fondo es claro, queremos texto oscuro si el color de la materia no es muy oscuro.
-    if (document.body.classList.contains('dark-mode')) {
-        return luminance > threshold ? '#333' : 'white'; // Fondo oscuro, si el color de la materia es claro, usa texto oscuro. Si es oscuro, usa texto blanco.
-    } else {
-        return luminance > threshold ? '#333' : 'white'; // Fondo claro, si el color de la materia es claro, usa texto oscuro. Si es oscuro, usa texto blanco.
-    }
+    // Si el modo oscuro está activo, el fondo de la página es oscuro.
+    // Si el color de la materia es claro (luminance > threshold), queremos texto oscuro para buen contraste.
+    // Si el color de la materia es oscuro (luminance <= threshold), queremos texto blanco.
+    // Esto asegura que el texto dentro de la materia siempre contraste bien,
+    // independientemente del modo de la página, ya que el color de la materia puede ser cualquiera.
+    return luminance > threshold ? '#333' : 'white';
 }
 
 
@@ -798,8 +811,6 @@ function renderizarMaterias() {
   
   for (const mat of materias) {
     if (!mat.oculto) {
-      // Ahora cada materia tiene un solo 'horario' o un array con un solo horario.
-      // Normalizamos a un array para la iteración.
       const horariosArray = Array.isArray(mat.horarios) ? mat.horarios : (mat.horarios ? [mat.horarios] : []);
       
       for (const horario of horariosArray) {
@@ -831,8 +842,10 @@ function renderizarMaterias() {
       celda.innerHTML = "";
       celda.style.display = "";
       celda.rowSpan = 1;
-      celda.style.backgroundColor = "";
-      celda.style.color = "";
+      // Remueve los estilos in-line de fondo y color directamente de la celda TD
+      // para que el CSS (incluido el de dark-mode) pueda aplicar el color de fondo por defecto
+      celda.style.backgroundColor = ""; 
+      celda.style.color = ""; 
 
       const materiasEnEsteBloque = ocupacion[clave] || [];
 
@@ -860,7 +873,7 @@ function renderizarMaterias() {
 }
 
 function mostrarFeedback(message, type = 'success') {
-    console.log(`Feedback: ${message} (Type: ${type})`); // Para Koder, puede que no se vea
+    console.log(`Feedback: ${message} (Type: ${type})`);
     if (!feedbackMessageDiv) {
         console.error("mostrarFeedback: Elemento feedbackMessageDiv no encontrado.");
         return;
@@ -1183,14 +1196,24 @@ function clearLocalStorageData() {
     }
 }
 
-// Lógica del Modo Oscuro
+---
+### Lógica del Modo Oscuro
+---
+
 const body = document.body;
 
 // Comprobar si hay una preferencia guardada al cargar la página
-const isDarkMode = localStorage.getItem('darkMode') === 'true';
-if (isDarkMode) {
+// Si no hay preferencia o es 'true', activa el modo oscuro.
+// Esto permite que el usuario pueda desactivarlo y que esa preferencia se respete.
+const isDarkMode = localStorage.getItem('darkMode'); 
+
+// Si no se ha guardado nada O si la preferencia guardada es 'true'
+if (isDarkMode === null || isDarkMode === 'true') { 
   body.classList.add('dark-mode');
   if (checkbox) checkbox.checked = true;
+} else { // Si la preferencia guardada es 'false' (modo claro)
+  body.classList.remove('dark-mode');
+  if (checkbox) checkbox.checked = false;
 }
 
 // Escuchar el cambio en el checkbox para alternar el modo oscuro
