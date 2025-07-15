@@ -625,7 +625,7 @@
 </head>
 <body>
 
-<h2>Generador de Horarios USM Simplificado</h2>
+<h2>Planificador de horarios</h2>
 
 <div class="theme-switch-wrapper">
   <label class="theme-switch" for="checkbox">
