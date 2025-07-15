@@ -15,7 +15,7 @@
       --dark-gray: #333;
       --border-color: #ccc;
       --table-border-color: #aaa;
-      --content-max-width: 2000px; /* Ancho máximo para el contenido principal */
+      --content-max-width: 4000px; /* Ancho máximo para el contenido principal */
     }
 
     /* Variables CSS para el modo oscuro */
