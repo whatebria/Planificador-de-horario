@@ -16,7 +16,7 @@
       --dark-gray: #333;
       --border-color: #ccc;
       --table-border-color: #aaa;
-      --content-max-width: 1000px; /* Ancho máximo para el contenido principal */
+      --content-max-width: 2000px; /* Ancho máximo para el contenido principal */
     }
 
     /* Variables CSS para el modo oscuro */
@@ -567,9 +567,6 @@
 
 <div id="feedback-message" class="feedback-message" aria-live="polite"></div>
 
-<h3>Materias agregadas</h3>
-<div id="lista-materias"></div>
-
 <table>
   <thead>
     <tr>
@@ -579,6 +576,9 @@
   </thead>
   <tbody id="tabla"></tbody>
 </table>
+
+<h3>Materias agregadas</h3>
+<div id="lista-materias"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
