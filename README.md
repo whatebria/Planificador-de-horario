@@ -1,7 +1,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <title>Horario USM Simplificado</title>
+  <title>Planificador de horario</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   
@@ -635,8 +635,6 @@
   </style>
 </head>
 <body>
-
-<h2>Planificador de horario</h2>
 
 <div class="theme-switch-wrapper">
   <label class="theme-switch" for="checkbox">
